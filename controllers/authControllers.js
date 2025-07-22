@@ -90,12 +90,10 @@ const login = async (req, res) => {
 
     // 4b. Send the response with the user data and token
 
-    const userToken =
-      process.env.NODE_ENV === "production"
-        ? "You are logged in token is set as a cookie"
-        : token;
+    const userToken = process.env.NODE_ENV === "production" ? "" : token;
     res.status(200).json({
       status: "success",
+      message: "Login successful",
       token: userToken,
       data: {
         user: {
