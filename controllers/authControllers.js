@@ -36,7 +36,7 @@ const signup = async (req, res) => {
     const message =
       process.env.NODE_ENV === "production"
         ? "An error occurred while signing up"
-        : error.message;
+        : console.log(error.message);
 
     res.status(500).json({
       status: "error",
@@ -45,7 +45,11 @@ const signup = async (req, res) => {
   }
 };
 
+
+
 // Export the controller functions
 module.exports = {
   signup,
 };
+
+
