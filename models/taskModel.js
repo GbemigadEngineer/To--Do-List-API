@@ -26,6 +26,7 @@ const taskSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: [true, "A task must belong to a user"],
+      select: false, // This will not return the password in queries
     },
   },
   {

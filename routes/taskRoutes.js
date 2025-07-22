@@ -1,15 +1,16 @@
 "use strict";
 
 const express = require("express");
-const taskController = require("../controllers/taskControllers");
+
 const protect = require("../middleware/authMiddleware");
+const { createTask } = require("../controllers/taskController");
 
 // Create a new router instance
 const router = express.Router();
 
 // Routes for tasks
 
-router.routes("/");
+router.route("/").post(protect, createTask).get(protect, );
 
 // Export the router
 module.exports = router;
