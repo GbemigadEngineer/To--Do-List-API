@@ -2,18 +2,12 @@
 const mongoose = require("mongoose");
 const Task = require("../models/taskModel");
 
+// lOGIN CHECKER
+
 // Create Task
 
 const createTask = async (req, res) => {
   try {
-    // 1. Check if user is logged in from the protect middleware request object.
-    if (!req.user) {
-      return res.status(401).json({
-        status: "fail",
-        message: "You must be logged in to create a task",
-      });
-    }
-
     // 2. Extract task data from the request body
     const { title, description, status } = req.body;
 
@@ -58,15 +52,6 @@ const createTask = async (req, res) => {
 
 const getAllTasks = async (req, res) => {
   try {
-    // 1. Check if user is logged in from the protect middleware
-
-    if (!req.user) {
-      return res.status(401).json({
-        status: "fail",
-        message: "You have to be logged in to view your tasks.",
-      });
-    }
-
     // 2. Fetch all tasks for the logged-in user
     const tasks = await Task.find({ user: req.user.id });
 
@@ -139,13 +124,6 @@ const getTask = async (req, res) => {
 // Update Task
 const updateTask = async (req, res) => {
   try {
-    // 1. Check if the user is logged in
-    if (!req.user) {
-      return res.status(401).json({
-        status: "fail",
-        message: "You must be logged in to update a task",
-      });
-    }
     //2. Get the task ID from the request parameters
     const taskId = req.params.id;
 
@@ -200,6 +178,45 @@ const updateTask = async (req, res) => {
 
 // Delete Task
 
+const deleteTask = async (req, res) => {
+  try {
+    // 2. Get the task ID from the request parameters
+    const taskId = req.params.id;
+
+    // 3. Check if it is a valid mongoose ObjectId
+    if (!taskId || !mongoose.Types.ObjectId.isValid(taskId)) {
+      return res.status(400).json({
+        status: "fail",
+        message: "A valid task ID is required",
+      });
+    }
+    // 4. Delete the task from the database
+    const deletedTask = await Task.findByIdAndDelete(taskId);
+    // 5. Check if the task was found and deleted
+    if (!deletedTask) {
+      return res.status(404).json({
+        status: "fail",
+        message: "Task not found!",
+      });
+    }
+    // 6. Send response
+    res.status(204).json({
+      status: "success",
+      message: "Task deleted successfully",
+      data: null,
+    });
+  } catch (error) {
+    const message =
+      process.env.NODE_ENV === "production"
+        ? "An error occurred while deleting the task"
+        : error.message;
+
+    res.status(500).json({
+      status: "error",
+      message: message,
+    });
+  }
+};
 
 // Export the controller functions
 module.exports = {
@@ -207,4 +224,5 @@ module.exports = {
   getAllTasks,
   getTask,
   updateTask,
+  deleteTask,
 };

@@ -8,6 +8,7 @@ const {
   getAllTasks,
   getTask,
   updateTask,
+  deleteTask,
 } = require("../controllers/taskController");
 
 // Create a new router instance
@@ -17,7 +18,11 @@ const router = express.Router();
 
 router.route("/").post(protect, createTask).get(protect, getAllTasks);
 
-router.route("/:id").get(protect, getTask).patch(protect, updateTask);
+router
+  .route("/:id")
+  .get(protect, getTask)
+  .patch(protect, updateTask)
+  .delete(protect, deleteTask);
 
 // Export the router
 module.exports = router;
