@@ -1,4 +1,5 @@
 "use strict";
+const mongoose = require("mongoose");
 const Task = require("../models/taskModel");
 
 // Create Task
@@ -55,13 +56,155 @@ const createTask = async (req, res) => {
 
 // Get all Tasks
 
+const getAllTasks = async (req, res) => {
+  try {
+    // 1. Check if user is logged in from the protect middleware
+
+    if (!req.user) {
+      return res.status(401).json({
+        status: "fail",
+        message: "You have to be logged in to view your tasks.",
+      });
+    }
+
+    // 2. Fetch all tasks for the logged-in user
+    const tasks = await Task.find({ user: req.user.id });
+
+    // 3. Send response
+    res.status(200).json({
+      status: "success",
+      results: tasks.length,
+      data: {
+        tasks,
+      },
+    });
+  } catch (error) {
+    const message =
+      process.env.NODE_ENV === "production"
+        ? "An error occurred while fetching tasks"
+        : error.message;
+
+    res.status(500).json({
+      status: "error",
+      message: message,
+    });
+  }
+};
+
 // Get Task by ID
 
+const getTask = async (req, res) => {
+  try {
+    // 1. Check if the user is logged in
+    if (!req.user) {
+      res.status(401).json({
+        status: "fail",
+        message: "You must be logged in to view a task",
+      });
+    }
+    // 2. Get the task ID from the request parameters
+    const taskId = req.params.id;
+
+    // 3. Check if it is a valid mongoose ObjectId
+    if (!taskId || !mongoose.Types.ObjectId.isValid(taskId)) {
+      return res.status(400).json({
+        status: "fail",
+        message: "A valid task ID is required",
+      });
+    }
+
+    // 4. Get the task with the given ID from the databse
+    const task = await Task.findById(taskId);
+
+    // 5. Send response
+    res.status(200).json({
+      status: "success",
+      data: {
+        task,
+      },
+    });
+  } catch (error) {
+    const message =
+      process.env.NODE_ENV === "production"
+        ? "An error occurred while fetching the task"
+        : error.message;
+
+    res.status(500).json({
+      status: "error",
+      message: message,
+    });
+  }
+};
+
 // Update Task
+const updateTask = async (req, res) => {
+  try {
+    // 1. Check if the user is logged in
+    if (!req.user) {
+      return res.status(401).json({
+        status: "fail",
+        message: "You must be logged in to update a task",
+      });
+    }
+    //2. Get the task ID from the request parameters
+    const taskId = req.params.id;
+
+    // 3. Check if it is a valid mongoose ObjectId
+    if (!taskId || !mongoose.Types.ObjectId.isValid(taskId)) {
+      return res.status(400).json({
+        status: "fail",
+        message: "A valid task ID is required",
+      });
+    }
+    // 4. Get the updated data from the request body
+
+    // 4a. Ensure that only allowed fields are updated
+    const allowedFields = ["title", "description", "status"];
+
+    const filteredBody = Object.fromEntries(
+      Object.entries(req.body).filter(([key]) => allowedFields.includes(key))
+    );
+    // 5. Update the task in the database
+    const updatedTask = await Task.findByIdAndUpdate(
+      req.params.id,
+      filteredBody,
+      { new: true, runValidators: true }
+    );
+
+    // 6. Check if the task was found and updated
+    if (!updateTask) {
+      return res.status(404).json({
+        status: "fail",
+        message: "Task not found!",
+      });
+    }
+
+    // 7. Send response
+    res.status(200).json({
+      status: "success",
+      data: {
+        task: updatedTask,
+      },
+    });
+  } catch (error) {
+    const message =
+      process.env.NODE_ENV === "production"
+        ? "An error occurred while updating the task"
+        : error.message;
+    res.status(500).json({
+      status: "error",
+      message: message,
+    });
+  }
+};
 
 // Delete Task
+
 
 // Export the controller functions
 module.exports = {
   createTask,
+  getAllTasks,
+  getTask,
+  updateTask,
 };
