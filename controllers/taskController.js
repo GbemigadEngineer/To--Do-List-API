@@ -2,8 +2,6 @@
 const mongoose = require("mongoose");
 const Task = require("../models/taskModel");
 
-// lOGIN CHECKER
-
 // Create Task
 
 const createTask = async (req, res) => {
@@ -49,13 +47,31 @@ const createTask = async (req, res) => {
 };
 
 // Get all Tasks
-
 const getAllTasks = async (req, res) => {
   try {
-    // 2. Fetch all tasks for the logged-in user
-    const tasks = await Task.find({ user: req.user.id });
+    // 1. Get the status query parameter if provided
+    const { status } = req.query;
 
-    // 3. Send response
+    // 2. Validate status if provided
+
+    const allowedStatuses = ["pending", "completed"];
+    if (status && !allowedStatuses.includes(status)) {
+      return res.status(400).json({
+        status: "fail",
+        message:
+          "Invalid status provided. Allowed values are 'pending' or 'completed'.",
+      });
+    }
+    // 3. Build query object
+
+    const query = { user: req.user.id };
+    if (status) {
+      query.status = status;
+    }
+    // 4. Fetch tasks from the database
+    const tasks = await Task.find(query);
+
+    // 5. send response
     res.status(200).json({
       status: "success",
       results: tasks.length,
