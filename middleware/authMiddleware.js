@@ -1,6 +1,8 @@
 "use strict";
 const jwt = require("jsonwebtoken");
+const User = require("../models/userModel");
 
+// protect middleware to check if the user is authenticated
 const protect = async (req, res, next) => {
   try {
     // 1. Check for the token in the cookies
@@ -18,9 +20,20 @@ const protect = async (req, res, next) => {
 
     // 2b. Verify the token to get the user ID
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
+    // 3. Find the user in the database and check their active status
+    // this is important to ensure the user is still active
+    const user = await User.findById(decoded.id)
+      .select("-password -passwordConfirm")
+      .where({ isActive: true, deletedAt: null });
+    // If the user is not found, return an error
+    if (!user) {
+      return res.status(401).json({
+        status: "fail",
+        message: "The user belonging to this token no longer exists.",
+      });
+    }
     // 3. Set the user in the request object
-    req.user = decoded;
+    req.user = user;
 
     // 4. Call the next middleware
     next();

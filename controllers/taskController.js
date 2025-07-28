@@ -16,6 +16,7 @@ const createTask = async (req, res) => {
         message: "A task must have a title",
       });
     }
+    
 
     // 4. Create a new task
     const newTask = await Task.create({
@@ -25,6 +26,7 @@ const createTask = async (req, res) => {
       date: new Date(),
       user: req.user.id, // Use the user ID from the request object
     });
+
 
     // 5. Send response
     res.status(201).json({
@@ -122,7 +124,7 @@ const getTask = async (req, res) => {
       status: "success",
       data: {
         task,
-      },
+      }, 
     });
   } catch (error) {
     const message =

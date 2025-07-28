@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
+const crypto = require("crypto");
 
 // Define the user schema
 const userSchema = new mongoose.Schema(
@@ -12,6 +13,18 @@ const userSchema = new mongoose.Schema(
         "A user with this name already exists, pls choose another username",
       ],
       trim: true,
+    },
+    email: {
+      type: String,
+      required: [true, "Email is required"],
+      unique: true,
+      lowercase: true,
+      validate: {
+        validator: function (v) {
+          return /^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$/.test(v);
+        },
+        message: "Please provide a valid email address",
+      },
     },
     password: {
       type: String,
@@ -30,9 +43,36 @@ const userSchema = new mongoose.Schema(
         message: "Passwords do not match",
       },
     },
+
+    // New field for soft delete
+    deletedAt: {
+      type: Date,
+      default: null, // Default to null, meaning not deleted
+    },
+    // You might also add an 'isActive' flag for quick checks
+    isActive: {
+      type: Boolean,
+      default: true, // Default to true, meaning active
+    },
+    passwordResetToken: String,
+    passwordResetExpires: Date,
   },
   { timestamps: true }
 );
+
+// Schema methods
+userSchema.methods.createPasswordResetToken = function () {
+  const resetToken = crypto.randomBytes(32).toString("hex");
+
+  this.passwordResetToken = crypto
+    .createHash("sha256")
+    .update(resetToken)
+    .digest("hex");
+
+  this.passwordResetExpires = Date.now() + 15 * 60 * 1000; //15 minutes
+
+  return resetToken; //this token would be sent via email
+};
 
 // Schema Middlewares
 

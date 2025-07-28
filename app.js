@@ -7,6 +7,7 @@ const cookieParser = require("cookie-parser");
 // importing modules
 const authRoutes = require("./routes/authRoutes");
 const taskRoutes = require("./routes/taskRoutes");
+const userRoutes = require("./routes/userRoutes");
 
 // Create an instance of an Express application
 const app = express();
@@ -26,9 +27,11 @@ app.use(cookieParser());
 
 //Router Middlewares
 // Mounting the auth routes
-app.use("/api/v1/todo", authRoutes);
+app.use("/api/v1/auth", authRoutes);
 // Mounting the task routes
 app.use("/api/v1/todo/tasks", taskRoutes);
+// Mounting the user router
+app.use("/api/v1/todo/user", userRoutes);
 
 // Export the app for use in other files
 module.exports = app;
