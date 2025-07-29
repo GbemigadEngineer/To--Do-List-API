@@ -18,7 +18,7 @@ const sendResetEmail = async (options) => {
 
   // 2. Define the email options
   const mailOptions = {
-    from: `"MY Todo List" <${process.env.EMAIL_USERNAME}>`,
+    from: `"MY Todo List" <${process.env.EMAIL_FROM}>`,
     to: options.email,
     subject: "Password Reset Token (Valid for 15 minutes)",
     text: options.message,

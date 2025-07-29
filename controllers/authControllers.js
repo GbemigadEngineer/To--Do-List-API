@@ -137,11 +137,12 @@ const forgotPassword = async (req, res) => {
   // 3. If validation passed Generate token, hash, and send the hashed token to the user
   const resetToken = user.createPasswordResetToken();
   await user.save({ validateBeforeSave: false });
-
+  console.log(resetToken);
+  console.log(user.passwordResetToken);
+  console.log("Token expires at:", new Date(user.passwordResetExpires));
   // 4. Send token to user's email
-  const resetURL = `${req.protocol}://${req.get(
-    "host"
-  )}/api/v1/auth/resetPassword/${resetToken}`;
+  const resetURL = `${req.protocol}://${req.get("host")}/api/v1/auth/resetPassword/${resetToken.trim()}`;
+
   const message = `Forgot your password? Submit a PATCH request to: ${resetURL}`;
 
   try {
@@ -165,11 +166,13 @@ const forgotPassword = async (req, res) => {
 
 const resetPassword = async (req, res) => {
   try {
+    const resetToken = req.params.token.trim();
     const hashedToken = crypto
       .createHash("sha256")
-      .update(req.params.token)
+      .update(resetToken)
       .digest("hex");
 
+    console.log(hashedToken);
     //1. Find user by token + check expiry
     const user = await User.findOne({
       passwordResetToken: hashedToken,
