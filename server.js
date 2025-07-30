@@ -17,11 +17,21 @@ mongoose
   });
 
 // Set the port for the server to listen on
-const PORT = process.env.PORT || 3000;
+const port = process.env.PORT || 3000;
 
 // Start the server
-app.listen(PORT, () => {
+app.listen(port, () => {
   process.env.NODE_ENV === "production"
     ? console.log(`Server is running on port ${PORT}, in production mode`)
     : console.log(`Server is running on port ${PORT}, in development mode`);
+});
+
+process.on("uncaughtException", (err) => {
+  console.error("Uncaught Exception:", err);
+  process.exit(1);
+});
+
+process.on("unhandledRejection", (err) => {
+  console.error("Unhandled Rejection:", err);
+  process.exit(1);
 });
