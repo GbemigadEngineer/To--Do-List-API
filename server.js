@@ -22,8 +22,8 @@ const port = process.env.PORT || 3000;
 // Start the server
 app.listen(port, () => {
   process.env.NODE_ENV === "production"
-    ? console.log(`Server is running on port ${PORT}, in production mode`)
-    : console.log(`Server is running on port ${PORT}, in development mode`);
+    ? console.log(`Server is running on port ${port}, in production mode`)
+    : console.log(`Server is running on port ${port}, in development mode`);
 });
 
 process.on("uncaughtException", (err) => {
@@ -35,3 +35,5 @@ process.on("unhandledRejection", (err) => {
   console.error("Unhandled Rejection:", err);
   process.exit(1);
 });
+
+
